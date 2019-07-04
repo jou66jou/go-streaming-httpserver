@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- <video id=video width=960 height=540 class="video-js vjs-default-skin" controls> -->
+    <video id="video" src="http://devimages.apple.com/iphone/samples/bipbop/bipbopall.m3u8"
+    height="300" width="400"></video>
+</video>
+
+
+
+<script lang="javascript">
+    var domain = window.location.hostname
+    var temp = domain.split(":")
+    var video = document.getElementById('video')
+    var source = document.createElement('source')
+    if (temp[0] == 'localhost')
+        temp[0] = '127.0.0.1'
+    video.src = 'http://' + temp[0] + ':7002/live/test.m3u8'
+    // source.setAttribute('src', 'http://' + temp[0] + ':7002/live/test.m3u8')
+    // source.setAttribute('type', 'application/x-mpegURL')
+    // video.appendChild(source);
+    
+</script>
+
+</html>

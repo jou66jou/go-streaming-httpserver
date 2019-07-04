@@ -1,0 +1,178 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="zh_cn" lang="zh_cn">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=gb2312" />
+    <title>rtmp streamer example</title>
+    <script data-main="/static/main" src="/static/require.js"></script>
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+    <script type="text/javascript">
+        $(function () {
+
+            var conn;
+            var msg = $("#msg");
+            var log = $("#log");
+
+            function appendLog(msg) {
+                var d = log[0]
+                var doScroll = d.scrollTop == d.scrollHeight - d.clientHeight;
+                msg.appendTo(log)
+                if (doScroll) {
+                    d.scrollTop = d.scrollHeight - d.clientHeight;
+                }
+            }
+
+            $("#form").submit(function () {
+                if (!conn) {
+                    return false;
+                }
+                if (!msg.val()) {
+                    return false;
+                }
+                conn.send(msg.val());
+                msg.val("");
+                return false
+            });
+
+            if (window["WebSocket"]) {
+                var domain = window.location.hostname
+                var temp = domain.split(":")
+                var wsUrl = 'ws://' + temp[0] + ":8080/chat";
+                conn = new WebSocket(wsUrl);
+                conn.onclose = function (evt) {
+                    appendLog($("<div><b>Connection Closed.</b></div>"))
+                }
+                conn.onmessage = function (evt) {
+                    let data = JSON.parse (evt.data)
+
+                    if (data.event == 'connCount'){
+                        getviewCount(data.content)
+                    }
+                    else if (data.event == 'chat'){
+                        appendLog($("<div/>").html("<font color=\"blue\">" + data.sender + "</font>  " + data.content))
+                    }
+                }
+            } else {
+                appendLog($("<div><b>WebSockets Not Support.</b></div>"))
+            }
+
+            function getviewCount(viewCount) {
+                $('#viewCount').html("<h2>目前觀看人數"+viewCount+"位<h2>")
+            }
+        });
+    </script>
+    <style type="text/css">
+        html {
+            overflow: hidden;
+        }
+
+        body {
+            overflow: hidden;
+            padding: 0;
+            margin: 0;
+            width: 100%;
+            height: 100%;
+            /* background: gray; */
+        }
+
+        /* #log {
+            background: white;
+            margin: 0;
+            padding: 0.5em 0.5em 0.5em 0.5em;
+            position: absolute;
+            top: 0.5em;
+            left: 0.5em;
+            right: 0.5em;
+            bottom: 3em;
+            overflow: auto;
+        } */
+
+        /* #form {
+            padding: 0 0.5em 0 0.5em;
+            margin: 0;
+            position: absolute;
+            bottom: 1em;
+            left: 0px;
+            width: 20%;
+            overflow: hidden;
+        } */
+
+        .container {
+            margin: 20px;
+            margin-top: 20px;
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .videoContainer {
+            width: 500px;
+            height: 500px;
+            margin: 20px;
+            padding: 35px;
+            border: solid 0.5px grey;
+            border-radius: 5px;
+        }
+
+        .chatContainer {
+            width: 500px;
+            height: 500px;
+            margin: 20px;
+            padding: 35px;
+            border: solid 0.5px grey;
+            border-radius: 5px;
+        }
+
+        .chatContainer {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chatList {
+            height: 500px;
+            overflow: scroll;
+        }
+
+        .senBox {
+            flex: 0.1
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="videoContainer">
+            直播服務位址:
+            <input id="url" type="text" style="width: 400px;" value="rtmp://localhost:1935/live" title="url">
+            <input id="stream-name" type="text" style="width: 150px;" value="test" title="stream-name">
+
+            <div id="viewCount"></div>
+            <object>
+                <embed id="rtmp-streamer" src="/static/RtmpStreamer.swf" bgcolor="#999999" quality="high" width="320"
+                    height="240" allowScriptAccess="sameDomain" type="application/x-shockwave-flash"></embed>
+            </object>
+            <br>
+
+            <button id="play"> 播放</button>
+            <button id="player-disconnect"> 暫停</button>
+            <hr>
+
+        </div>
+
+        <div class="chatContainer">
+            <div id="log" class="chatList"></div>
+            <form id="form" class="senBox">
+                <input type="text" id="msg" size="64" />
+                <input type="submit" value="發送訊息" />
+            </form>
+        </div>
+    </div>
+</body>
+
+<script lang="javascript">
+    var domain = window.location.hostname
+    var temp = domain.split(":")
+    document.getElementById('url').value = 'rtmp://' + temp[0] + ":1935/live";
+</script>
+
+</html>
